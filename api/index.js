@@ -77,6 +77,10 @@ add('GET', '/callback', async (ctx) => (await require('../lib/login')).callback(
 add('POST', '//submit-code', async (ctx) => (await require('../lib/login')).handleSubmit(ctx));
 add('GET', '/api/qrcode', async (ctx) => (await require('../lib/qrlogin')).qrcodeApi(ctx));
 add('GET', '/api/qrcode-poll', async (ctx) => (await require('../lib/qrlogin')).pollApi(ctx));
+add('GET', '/api/qrcode-diag', async (ctx) => {
+  const q = await require('../lib/qrlogin');
+  return util.json(ctx.res, 200, q.pollDiag());
+});
 add('GET', '/submit-code', async (ctx) => (await require('../lib/login')).handleSubmit(ctx));
 
 // 每日自动签到
