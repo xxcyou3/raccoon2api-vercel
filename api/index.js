@@ -85,6 +85,22 @@ add('*', /^\/api\/cron\/maintain$/, async (ctx) => (await require('../lib/cron')
 // OpenAI 兼容网关
 add('*', /^\/v1\/(chat\/completions|models|completions)$/, async (ctx) => (await require('../lib/openai')).route(ctx));
 
+// 诊断：账号存储后端（KV / env / file）+ KV 连通性
+add('GET', '/api/x/diag', async (ctx) => {
+  const accounts = require('../lib/accounts');
+  const kv = require('../lib/kv');
+  const out = { backend: accounts.backend ? accounts.backend() : 'unknown', kv: kv.info ? kv.info() : null };
+  try {
+    if (kv.available && kv.available()) {
+      out.kvWrite = await kv.set('__diag_probe', String(Date.now()));
+      out.kvRead = await kv.get('__diag_probe');
+      out.kvOk = !!out.kvRead;
+      await kv.del('__diag_probe');
+    }
+  } catch (e) { out.kvError = String(e.message || e).slice(0, 200); }
+  return util.json(ctx.res, 200, out);
+});
+
 // 管理面板 + 管理 API
 add('*', /^\/admin(\/.*)?$/, async (ctx) => (await require('../lib/admin')).route(ctx));
 add('*', /^\/api\/admin(\/.*)?$/, async (ctx) => (await require('../lib/admin')).api(ctx));
