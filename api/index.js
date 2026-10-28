@@ -73,8 +73,10 @@ add('GET', '/health', async (ctx) => {
 
 // 登录页
 add('GET', '/login', async (ctx) => (await require('../lib/qrlogin')).page(ctx));
+// 模型展示页（卡片式列出可用模型 + 计费 credits）
+add('GET', '/models', async (ctx) => (await require('../lib/modelspage')).page(ctx));
 add('GET', '/callback', async (ctx) => (await require('../lib/login')).callback(ctx));
-add('POST', '//submit-code', async (ctx) => (await require('../lib/login')).handleSubmit(ctx));
+add('POST', '/submit-code', async (ctx) => (await require('../lib/login')).handleSubmit(ctx));
 add('GET', '/api/qrcode', async (ctx) => (await require('../lib/qrlogin')).qrcodeApi(ctx));
 add('GET', '/api/qrcode-poll', async (ctx) => (await require('../lib/qrlogin')).pollApi(ctx));
 add('GET', '/api/qrcode-diag', async (ctx) => {

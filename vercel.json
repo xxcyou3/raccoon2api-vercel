@@ -11,11 +11,37 @@
     }
   ],
   "routes": [
-    { "src": "/health", "dest": "/api/index.js" },
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/v1/(.*)", "dest": "/api/index.js" },
-    { "src": "/login", "dest": "/api/index.js" },
-    { "src": "/callback", "dest": "/api/index.js" },
-    { "src": "/admin", "dest": "/api/index.js" },
-    { "src": "/", "dest": "/api/index.js" }
-  ]}
+    {
+      "src": "/health",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/v1/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/models",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/login",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/callback",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/admin",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/",
+      "dest": "/api/index.js"
+    }
+  ]
+}

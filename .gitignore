@@ -8,3 +8,5 @@ data/
 tmp/
 *.tar.gz
 *.bak.*
+.bash_history
+.ai/
