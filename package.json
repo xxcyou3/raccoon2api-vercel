@@ -1,0 +1,14 @@
+{
+  "name": "raccoon2api-vercel",
+  "version": "1.0.0",
+  "description": "小浣熊办公版网关：扫码换票 + token刷新 + 每日签到 + OpenAI兼容LLM网关（零依赖，纯Vercel serverless）",
+  "scripts": {
+    "start": "node dev-server.js",
+    "test": "node test/run.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

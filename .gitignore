@@ -1,0 +1,10 @@
+.vercel
+node_modules/
+*.log
+.env
+.env.*
+.DS_Store
+data/
+tmp/
+*.tar.gz
+*.bak.*
