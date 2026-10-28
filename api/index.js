@@ -85,6 +85,17 @@ add('*', /^\/api\/cron\/maintain$/, async (ctx) => (await require('../lib/cron')
 // OpenAI 兼容网关
 add('*', /^\/v1\/(chat\/completions|models|completions)$/, async (ctx) => (await require('../lib/openai')).route(ctx));
 
+// 迁移：把 env 里的账号搬进 KV（一次性，幂等）
+add('POST', '/api/admin/migrate-kv', async (ctx) => {
+  const accounts = require('../lib/accounts');
+  try {
+    const r = await accounts.syncAllEnv();
+    return util.json(ctx.res, 200, { ok: true, ...r });
+  } catch (e) {
+    return util.json(ctx.res, 500, { ok: false, error: String(e.message || e).slice(0, 300) });
+  }
+});
+
 // 诊断：账号存储后端（KV / env / file）+ KV 连通性
 add('GET', '/api/x/diag', async (ctx) => {
   const accounts = require('../lib/accounts');
