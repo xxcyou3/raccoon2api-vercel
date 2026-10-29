@@ -52,8 +52,39 @@ async function dispatch(ctx) {
   util.json(ctx.res, 404, { error: 'not_found', path });
 }
 
+// ---------- CORS ----------
+// 浏览器端第三方客户端（NextChat / LobeChat 网页版 / 自建前端）直连必须要有 CORS，
+// 否则预检 OPTIONS 失败、请求被浏览器拦掉（表现为"连不上/网络错误"）。
+// 只对 API 路径开放（/v1、/api），后台页面不开放外站跨域。
+function isApiPath(path) {
+  return path.startsWith('/v1/') || path === '/v1' || path.startsWith('/api/');
+}
+
+function applyCors(req, res, path) {
+  if (!isApiPath(path)) return;
+  const origin = (req.headers && req.headers.origin) || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  // 回显客户端请求头（Authorization / x-api-key / 自定义头都要允许）
+  const reqHdrs = (req.headers && req.headers['access-control-request-headers']);
+  res.setHeader('Access-Control-Allow-Headers',
+    reqHdrs || 'Authorization, Content-Type, x-api-key, x-admin-token, x-refresh-token, x-requested-with');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Access-Control-Expose-Headers', 'x-account, x-model, Content-Type');
+}
+
 module.exports = async function handler(req, res) {
   try {
+    const { path } = parseUrl(req.url || '/');
+    applyCors(req, res, path);
+
+    // 预检请求直接放行，不做任何业务处理
+    if ((req.method || '').toUpperCase() === 'OPTIONS' && isApiPath(path)) {
+      res.statusCode = 204;
+      return res.end();
+    }
+
     const ctx = await makeCtx(req, res);
     await dispatch(ctx);
   } catch (e) {
