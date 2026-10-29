@@ -68,10 +68,10 @@ function isApiPath(path) {
 // 只补平台没给的头：allow-headers（Authorization 预检必需）、max-age、expose。
 function applyCors(req, res, path) {
   if (!isApiPath(path)) return;
-  // 只有平台/代理没给的时候才补，避免任何情况下的重复
-  if (!res.getHeader('Access-Control-Allow-Origin')) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
+  // ⚠️ 绝对不要在函数里设 allow-origin / allow-methods：
+  // Vercel 平台层是在【函数返回之后】才注入这两个头的，函数内 getHeader 看不到，
+  // 所以任何"检查后再设"都会造成重复 → 浏览器判定多值 → CORS 直接失败。
+  // origin 和 methods 完全交给平台；这里只补平台不给的三个头。
   const reqHdrs = (req.headers && req.headers['access-control-request-headers']);
   if (!res.getHeader('Access-Control-Allow-Headers')) {
     res.setHeader('Access-Control-Allow-Headers',
