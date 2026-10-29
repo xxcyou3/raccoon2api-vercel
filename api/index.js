@@ -60,18 +60,27 @@ function isApiPath(path) {
   return path.startsWith('/v1/') || path === '/v1' || path.startsWith('/api/');
 }
 
+// 注意：Vercel 平台层已经自动给函数响应加上
+//   access-control-allow-origin: *
+//   access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
+// 我们【绝不能】再设这两个头 —— 重复设置会产生两个不同值，
+// 浏览器判定 allow-origin 有多个值 → 直接判 CORS 失败。
+// 只补平台没给的头：allow-headers（Authorization 预检必需）、max-age、expose。
 function applyCors(req, res, path) {
   if (!isApiPath(path)) return;
-  const origin = (req.headers && req.headers.origin) || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  // 回显客户端请求头（Authorization / x-api-key / 自定义头都要允许）
+  // 只有平台/代理没给的时候才补，避免任何情况下的重复
+  if (!res.getHeader('Access-Control-Allow-Origin')) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
   const reqHdrs = (req.headers && req.headers['access-control-request-headers']);
-  res.setHeader('Access-Control-Allow-Headers',
-    reqHdrs || 'Authorization, Content-Type, x-api-key, x-admin-token, x-refresh-token, x-requested-with');
-  res.setHeader('Access-Control-Max-Age', '86400');
-  res.setHeader('Access-Control-Expose-Headers', 'x-account, x-model, Content-Type');
+  if (!res.getHeader('Access-Control-Allow-Headers')) {
+    res.setHeader('Access-Control-Allow-Headers',
+      reqHdrs || 'Authorization, Content-Type, x-api-key, x-admin-token, x-refresh-token, x-requested-with');
+  }
+  if (!res.getHeader('Access-Control-Max-Age')) res.setHeader('Access-Control-Max-Age', '86400');
+  if (!res.getHeader('Access-Control-Expose-Headers')) {
+    res.setHeader('Access-Control-Expose-Headers', 'x-account, x-model, Content-Type');
+  }
 }
 
 module.exports = async function handler(req, res) {
